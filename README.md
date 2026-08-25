@@ -2,7 +2,7 @@
 
 _**Tribes Mobile Social Connection App**_
 
-_T_ribes (PulseConnect) with the new requested access control, review-based signout, and guest preview features.
+_Tribes_ (PulseConnect) with the new requested access control, review-based signout, and guest preview features.
 
 📱**Features & Verification**__
 
