@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tribes - Private Social Connection Mobile App</title>
+  
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Mobile Device Wrapper -->
+  <div class="device-wrapper">
+    
+    <!-- Mobile Status Bar -->
+    <div class="status-bar">
+      <span id="clock-time">9:41</span>
+      <div class="status-bar-icons">
+        <i data-lucide="signal" style="width:14px;height:14px;"></i>
+        <i data-lucide="wifi" style="width:14px;height:14px;"></i>
+        <i data-lucide="battery" style="width:16px;height:16px;"></i>
+      </div>
+    </div>
+
+    <!-- Guest Mode Warning Banner (Shown only for uninvited guests) -->
+    <div id="guest-mode-banner" class="hidden" style="background:linear-gradient(135deg, rgba(245,158,11,0.9), rgba(236,72,153,0.9));color:white;padding:6px 14px;font-size:0.72rem;font-weight:700;display:flex;justify-content:space-between;align-items:center;z-index:60;">
+      <span>👀 READ-ONLY GUEST MODE — Meetups Preview Only</span>
+      <button id="btn-unlock-guest" style="background:white;color:#0f172a;border:none;padding:2px 8px;border-radius:6px;font-size:0.68rem;font-weight:800;cursor:pointer;">Enter Code</button>
+    </div>
+
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="group-info">
+        <div class="group-avatar">T</div>
+        <div>
+          <div class="group-title">The Weekend Crew</div>
+          <span class="group-code-badge" id="header-code-badge"><i data-lucide="lock" style="width:10px;height:10px;display:inline;"></i> Code: TRIBES-8849</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <!-- Multi-User Selector Pill -->
+        <div class="user-switch-pill" id="user-switch-btn" title="Switch active user to test multi-user group chat/calls/taps">
+          <img id="current-user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar">
+          <span id="current-user-name">Alex</span>
+          <i data-lucide="chevron-down" style="width:12px;height:12px;"></i>
+        </div>
+        <button class="icon-btn" id="invite-share-btn" title="Copy Invite Code"><i data-lucide="user-plus"></i></button>
+      </div>
+    </header>
+
+    <!-- Main Views Container -->
+    <main class="app-content">
+
+      <!-- TAB 1: GROUP CHAT -->
+      <section id="tab-chat" class="tab-view active">
+        <div class="chat-container">
+          
+          <!-- Pinned Header Banner -->
+          <div class="pinned-banner" id="pinned-banner">
+            <div class="pinned-info">
+              <span class="pinned-tag">PINNED</span>
+              <span id="pinned-content-text">🌴 Saturday Beach Chill • RSVP Open</span>
+            </div>
+            <button class="icon-btn" style="width:24px;height:24px;" id="view-pinned-btn"><i data-lucide="chevron-right"></i></button>
+          </div>
+
+          <!-- Message Feed -->
+          <div class="chat-messages" id="chat-messages-list">
+            <!-- Messages dynamically populated by app.js -->
+          </div>
+
+          <!-- @Mentions Autocomplete Dropdown -->
+          <div class="mentions-menu" id="mentions-menu">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Chat Input Bar -->
+          <div class="chat-input-bar">
+            <button class="icon-btn action-lock-guest" id="btn-attach-media" style="border:none;background:none;" title="Attach photo/video/link"><i data-lucide="paperclip"></i></button>
+            <button class="icon-btn action-lock-guest" id="btn-create-poll" style="border:none;background:none;" title="Create Poll"><i data-lucide="bar-chart-2"></i></button>
+            <input type="text" id="chat-input" placeholder="Message group (type @ to mention)...">
+            <button class="icon-btn action-lock-guest" id="btn-voice-note" style="border:none;background:none;color:var(--secondary);" title="Record Voice Note"><i data-lucide="mic"></i></button>
+            <button class="icon-btn action-lock-guest" id="btn-send-msg" style="background:var(--primary);color:white;border:none;" title="Send"><i data-lucide="send"></i></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: CALENDAR & EVENTS (ACCESSIBLE TO GUESTS) -->
+      <section id="tab-events" class="tab-view">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div>
+            <h2 style="font-size:1.1rem;font-weight:800;">Group Meetups</h2>
+            <p style="font-size:0.75rem;color:var(--text-muted);">Max 3 public meetups per week</p>
+          </div>
+          <button class="btn-primary action-lock-guest" id="btn-open-create-event" style="width:auto;padding:8px 14px;font-size:0.8rem;">
+            <i data-lucide="plus"></i> New Meetup
+          </button>
+        </div>
+
+        <!-- Weekly Counter Status Pill -->
+        <div style="background:rgba(99,102,241,0.12);border:1px solid var(--border-glass-glow);padding:10px 14px;border-radius:12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:0.8rem;font-weight:600;"><i data-lucide="calendar" style="width:14px;height:14px;display:inline;vertical-align:-2px;"></i> Scheduled This Week:</span>
+          <span id="weekly-meetup-badge" class="badge-tag badge-rsvp">2 / 3 Meetups</span>
+        </div>
+
+        <!-- Draft Queue Alert -->
+        <div id="drafts-queue-card" class="hidden" style="background:rgba(245,158,11,0.12);border:1px solid var(--accent-amber);padding:12px;border-radius:14px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <span class="badge-draft">DRAFT QUEUE</span>
+              <div style="font-size:0.85rem;font-weight:700;margin-top:4px;" id="draft-title-text">Sunset Rooftop Party</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);">Queued for next week's calendar publish</div>
+            </div>
+            <button class="btn-secondary action-lock-guest" id="btn-publish-draft" style="width:auto;padding:6px 12px;font-size:0.75rem;">Publish</button>
+          </div>
+        </div>
+
+        <!-- Calendar Month View Grid -->
+        <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:12px;margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-weight:700;font-size:0.9rem;" id="cal-month-name">July 2026</span>
+            <div style="display:flex;gap:4px;">
+              <button class="icon-btn" style="width:28px;height:28px;"><i data-lucide="chevron-left"></i></button>
+              <button class="icon-btn" style="width:28px;height:28px;"><i data-lucide="chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="calendar-grid" id="calendar-grid-days">
+            <!-- Dynamically generated by app.js -->
+          </div>
+        </div>
+
+        <!-- Meetup Cards List (Previewable by Guests!) -->
+        <h3 style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Upcoming Events</h3>
+        <div id="events-list">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- TAB 3: SAFETY & STATUS TAPS -->
+      <section id="tab-safety" class="tab-view">
+        <div style="margin-bottom:14px;">
+          <h2 style="font-size:1.1rem;font-weight:800;">Safety & Status Taps</h2>
+          <p style="font-size:0.75rem;color:var(--text-muted);">Real-time meetup check-ins & safety verification</p>
+        </div>
+
+        <!-- Active Event Info Bar -->
+        <div style="background:linear-gradient(135deg, rgba(6,182,212,0.15), rgba(99,102,241,0.15));border:1px solid var(--border-glass-glow);padding:14px;border-radius:16px;margin-bottom:16px;">
+          <div style="font-size:0.7rem;color:var(--accent-cyan);font-weight:700;text-transform:uppercase;">CURRENT MEETUP WINDOW</div>
+          <div style="font-size:1rem;font-weight:800;margin-top:2px;" id="safety-event-title">Saturday Beach Chill</div>
+          <div style="font-size:0.8rem;color:var(--text-sub);margin-top:4px;" id="safety-event-time"><i data-lucide="clock" style="width:12px;height:12px;display:inline;"></i> Today @ 4:00 PM (Active 30hr Window)</div>
+        </div>
+
+        <!-- Action Taps Stack -->
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+          
+          <!-- 1. RSVP TAP -->
+          <div class="tap-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:0.85rem;font-weight:700;">1. RSVP Tap</span>
+              <span style="font-size:0.7rem;color:var(--accent-cyan);" id="rsvp-status-timer">Closes 15m before event</span>
+            </div>
+            <button class="tap-btn tap-rsvp action-lock-guest" id="btn-tap-rsvp">
+              <i data-lucide="check-circle-2"></i> TAP TO RSVP (ATTENDING)
+            </button>
+          </div>
+
+          <!-- 2. REACHED TAP -->
+          <div class="tap-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:0.85rem;font-weight:700;">2. Reached Venue Tap</span>
+              <span style="font-size:0.7rem;color:var(--accent-amber);" id="reached-status-timer">Open for 90m from event start</span>
+            </div>
+            <button class="tap-btn tap-reached action-lock-guest" id="btn-tap-reached">
+              <i data-lucide="map-pin"></i> TAP WHEN YOU ARRIVE
+            </button>
+          </div>
+
+          <!-- 3. SAFE HOME TAP -->
+          <div class="tap-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:0.85rem;font-weight:700;">3. Safe Home Tap</span>
+              <span style="font-size:0.7rem;color:var(--accent-emerald);" id="safe-status-timer">Closes ONLY after you tap it</span>
+            </div>
+            <button class="tap-btn tap-safe action-lock-guest" id="btn-tap-safe">
+              <i data-lucide="shield-check"></i> TAP WHEN SAFE AT HOME
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Group Status Matrix -->
+        <h3 style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;">Group Safety Live Matrix</h3>
+        <div class="status-matrix" id="safety-matrix-list">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- TAB 4: GROUP CALLS -->
+      <section id="tab-calls" class="tab-view">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div>
+            <h2 style="font-size:1.1rem;font-weight:800;">Group Calls</h2>
+            <p style="font-size:0.75rem;color:var(--text-muted);">Scheduled calls with RSVP ringing</p>
+          </div>
+          <button class="btn-primary action-lock-guest" id="btn-open-schedule-call" style="width:auto;padding:8px 14px;font-size:0.8rem;">
+            <i data-lucide="video"></i> Schedule Call
+          </button>
+        </div>
+
+        <!-- Active Ongoing Call Banner -->
+        <div id="ongoing-call-banner" style="background:linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,182,212,0.2));border:1px solid var(--accent-emerald);padding:14px;border-radius:16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <span class="badge-tag badge-safe" style="display:inline-block;margin-bottom:4px;">LIVE NOW</span>
+            <div style="font-size:0.95rem;font-weight:800;">Weekend Trip Planning Call</div>
+            <div style="font-size:0.75rem;color:var(--text-sub);">3 members connected</div>
+          </div>
+          <button class="btn-primary action-lock-guest" id="btn-join-ongoing-call" style="width:auto;padding:10px 16px;background:var(--accent-emerald);">
+            <i data-lucide="phone-call"></i> Join Call
+          </button>
+        </div>
+
+        <h3 style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;">Scheduled Calls</h3>
+        <div id="scheduled-calls-list">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- TAB 5: PROFILE & PRIVACY & LEAVE GROUP -->
+      <section id="tab-profile" class="tab-view">
+        <div style="text-align:center;padding:20px 0;">
+          <img id="profile-picture" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80" style="width:90px;height:90px;border-radius:50%;border:3px solid var(--primary);box-shadow:0 0 20px rgba(99,102,241,0.4);" alt="Profile">
+          <h2 style="font-size:1.3rem;font-weight:800;margin-top:10px;" id="profile-display-name">Alex Rivera</h2>
+          <span style="font-size:0.85rem;color:var(--accent-cyan);" id="profile-handle">@alex_vibes</span>
+          
+          <div style="margin-top:14px;display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:var(--accent-emerald);padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;">
+            <i data-lucide="shield-check" style="width:14px;height:14px;"></i> Email & Mobile Number Hidden
+          </div>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:16px;margin-bottom:16px;">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;">INVITE FRIENDS</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(15,23,42,0.8);padding:10px 14px;border-radius:12px;">
+            <span style="font-weight:800;color:var(--accent-cyan);">TRIBES-8849</span>
+            <button class="btn-secondary" id="btn-copy-code-profile" style="width:auto;padding:6px 12px;font-size:0.75rem;"><i data-lucide="copy"></i> Copy Code</button>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;padding:16px;margin-bottom:16px;">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);margin-bottom:12px;">ACCOUNT PRIVACY & SECURITY</div>
+          <div style="font-size:0.8rem;color:var(--text-sub);line-height:1.5;">
+            • Phone & Email are confidential for authentication only.<br>
+            • Only group members with code <b>TRIBES-8849</b> can view group activity.<br>
+            • Safety status logs automatically archive after 30 hours.
+          </div>
+        </div>
+
+        <!-- SIGNOUT / LEAVE GROUP BUTTON -->
+        <button class="btn-secondary" id="btn-open-signout-review" style="background:rgba(244,63,94,0.12);color:var(--accent-rose);border-color:rgba(244,63,94,0.3);margin-bottom:20px;">
+          <i data-lucide="log-out"></i> Write Review & Sign Out (Leave Group)
+        </button>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="tab-chat">
+        <i data-lucide="message-square"></i>
+        <span>Chat</span>
+      </button>
+      <button class="nav-item" data-tab="tab-events">
+        <i data-lucide="calendar"></i>
+        <span>Meetups</span>
+      </button>
+      <button class="nav-item badge-dot" data-tab="tab-safety">
+        <i data-lucide="shield"></i>
+        <span>Safety</span>
+      </button>
+      <button class="nav-item" data-tab="tab-calls">
+        <i data-lucide="phone"></i>
+        <span>Calls</span>
+      </button>
+      <button class="nav-item" data-tab="tab-profile">
+        <i data-lucide="user"></i>
+        <span>Profile</span>
+      </button>
+    </nav>
+
+    <!-- ONBOARDING & AUTH GATE OVERLAY -->
+    <div id="auth-gate-overlay" class="auth-gate hidden">
+      
+      <!-- STEP 1: INVITE CODE STEP (Includes Guest View option!) -->
+      <div id="auth-step-invite" class="auth-card">
+        <div class="app-brand">
+          <h1>Join Tribe</h1>
+          <p>Private Social Connections for Your Inner Circle</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ENTER 6-CHARACTER INVITE CODE</label>
+          <input type="text" id="input-invite-code" class="input-field" placeholder="e.g. TRIBES-8849" value="TRIBES-8849" style="text-transform:uppercase;letter-spacing:2px;font-weight:700;text-align:center;">
+        </div>
+        <button class="btn-primary" id="btn-submit-invite">Verify Invite Code <i data-lucide="arrow-right"></i></button>
+        
+        <!-- Continue without invite as Guest -->
+        <button class="btn-secondary" id="btn-guest-preview" style="margin-top:10px;font-size:0.8rem;border-style:dashed;">
+          <i data-lucide="eye"></i> Continue without Invite (Read-Only Preview)
+        </button>
+      </div>
+
+      <!-- STEP 2: CHOOSE METHOD (EMAIL OR PHONE) -->
+      <div id="auth-step-method" class="auth-card hidden">
+        <div class="app-brand">
+          <h1>Sign In</h1>
+          <p>Choose your verification method</p>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <button class="btn-secondary" id="btn-opt-email" style="flex:1;border-color:var(--primary);"><i data-lucide="mail"></i> Email</button>
+          <button class="btn-secondary" id="btn-opt-phone" style="flex:1;"><i data-lucide="smartphone"></i> Mobile SMS</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="auth-input-label">Enter Email Address</label>
+          <input type="text" id="input-contact" class="input-field" placeholder="alex@example.com">
+        </div>
+        <button class="btn-primary" id="btn-send-otp">Send 6-Digit Code <i data-lucide="send"></i></button>
+      </div>
+
+      <!-- STEP 3: 6-DIGIT OTP VERIFICATION -->
+      <div id="auth-step-otp" class="auth-card hidden">
+        <div class="app-brand">
+          <h1>Enter 6-Digit Code</h1>
+          <p id="otp-sent-to-text">We sent a verification code to alex@example.com</p>
+        </div>
+        <div class="otp-container">
+          <input type="text" maxlength="1" class="otp-digit" value="7">
+          <input type="text" maxlength="1" class="otp-digit" value="8">
+          <input type="text" maxlength="1" class="otp-digit" value="4">
+          <input type="text" maxlength="1" class="otp-digit" value="9" style="width:44px;">
+          <input type="text" maxlength="1" class="otp-digit" value="2">
+          <input type="text" maxlength="1" class="otp-digit" value="1">
+        </div>
+        <button class="btn-primary" id="btn-verify-otp">Verify & Continue <i data-lucide="check"></i></button>
+      </div>
+
+      <!-- STEP 4: ICEBREAKER -->
+      <div id="auth-step-icebreaker" class="auth-card hidden">
+        <div class="app-brand">
+          <h1>Quick Icebreaker 🧊</h1>
+          <p>Let your tribe know what you're up to today</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">WHAT'S YOUR CURRENT VIBE?</label>
+          <select id="select-icebreaker-vibe" class="input-field">
+            <option value="Ready for weekend adventures! 🌴">Ready for weekend adventures! 🌴</option>
+            <option value="Chilling & grabbing coffee ☕">Chilling & grabbing coffee ☕</option>
+            <option value="Up for dinner & drinks 🍕">Up for dinner & drinks 🍕</option>
+            <option value="In focus mode, see you guys later 🎧">In focus mode, see you guys later 🎧</option>
+          </select>
+        </div>
+        <button class="btn-primary" id="btn-submit-icebreaker">Join Group Workspace <i data-lucide="arrow-right"></i></button>
+      </div>
+
+    </div>
+
+    <!-- SIGNOUT REVIEW BOTTOM SHEET MODAL -->
+    <div id="modal-signout-review" class="modal-overlay">
+      <div class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:6px;color:var(--accent-rose);">Write a Review & Leave</h3>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:14px;">Your past messages and activity will be securely preserved in the group. No signout message will be posted to chat.</p>
+        
+        <div class="form-group">
+          <label class="form-label">WHY ARE YOU LEAVING? (REQUIRED REVIEW)</label>
+          <textarea id="input-signout-review" class="input-field" rows="4" placeholder="Share your experience, feedback, or reason for leaving..."></textarea>
+        </div>
+        
+        <button class="btn-primary" id="btn-submit-signout-review" style="background:var(--accent-rose);">
+          Submit Review & Sign Out <i data-lucide="log-out"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- CALL RINGER OVERLAY MODAL -->
+    <div id="call-ring-modal" class="call-ring-overlay hidden">
+      <img class="caller-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Caller">
+      <h2 style="font-size:1.4rem;font-weight:800;" id="ring-call-title">Scheduled Group Call Starting!</h2>
+      <p style="font-size:0.85rem;color:var(--text-sub);margin-top:6px;" id="ring-call-desc">You indicated "OK" for this scheduled call.</p>
+      
+      <div class="call-actions">
+        <button class="btn-call-decline" id="btn-ring-decline" title="Decline"><i data-lucide="phone-off"></i></button>
+        <button class="btn-call-accept" id="btn-ring-accept" title="Accept Call"><i data-lucide="phone-call"></i></button>
+      </div>
+    </div>
+
+    <!-- FULLSCREEN VIDEO CALL ROOM MODAL -->
+    <div id="call-room-modal" class="call-room hidden">
+      <div style="padding:12px 18px;background:rgba(15,23,42,0.9);display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:800;font-size:0.95rem;" id="room-call-title">Weekend Trip Planning Call</div>
+          <span style="font-size:0.7rem;color:var(--accent-emerald);"><i data-lucide="disc" style="width:10px;height:10px;display:inline;"></i> 04:12 • 4 Members Connected</span>
+        </div>
+        <button class="icon-btn" id="btn-minimize-call" style="background:none;border:none;"><i data-lucide="chevron-down"></i></button>
+      </div>
+
+      <div class="video-grid">
+        <div class="video-tile speaking">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80" alt="Alex">
+          <span class="tile-name">Alex (You) 🔊</span>
+        </div>
+        <div class="video-tile">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&auto=format&fit=crop&q=80" alt="Sarah">
+          <span class="tile-name">Sarah</span>
+        </div>
+        <div class="video-tile">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80" alt="Jordan">
+          <span class="tile-name">Jordan</span>
+        </div>
+        <div class="video-tile">
+          <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&auto=format&fit=crop&q=80" alt="Priya">
+          <span class="tile-name">Priya</span>
+        </div>
+      </div>
+
+      <div class="call-controls">
+        <button class="icon-btn" id="btn-toggle-mic" style="width:48px;height:48px;border-radius:50%;"><i data-lucide="mic"></i></button>
+        <button class="icon-btn" id="btn-toggle-video" style="width:48px;height:48px;border-radius:50%;"><i data-lucide="video"></i></button>
+        <button class="icon-btn" style="width:48px;height:48px;border-radius:50%;"><i data-lucide="monitor"></i></button>
+        <button class="icon-btn" id="btn-end-call" style="width:52px;height:52px;border-radius:50%;background:var(--accent-rose);color:white;border:none;"><i data-lucide="phone-off"></i></button>
+      </div>
+    </div>
+
+    <!-- BOTTOM SHEET: SCHEDULE CALL -->
+    <div id="modal-schedule-call" class="modal-overlay">
+      <div class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px;">Schedule Group Call</h3>
+        <div class="form-group">
+          <label class="form-label">CALL TITLE</label>
+          <input type="text" id="input-call-title" class="input-field" placeholder="e.g. Saturday Meetup Planning">
+        </div>
+        <div class="form-group">
+          <label class="form-label">START TIME (Must be at least 15 mins in advance)</label>
+          <input type="datetime-local" id="input-call-time" class="input-field">
+        </div>
+        <button class="btn-primary" id="btn-submit-schedule-call">Schedule & Notify Group <i data-lucide="bell"></i></button>
+      </div>
+    </div>
+
+    <!-- BOTTOM SHEET: CREATE EVENT / MEETUP -->
+    <div id="modal-create-event" class="modal-overlay">
+      <div class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px;">New Meetup / Event</h3>
+        <div class="form-group">
+          <label class="form-label">EVENT TITLE</label>
+          <input type="text" id="input-event-title" class="input-field" placeholder="e.g. Saturday Beach Chill">
+        </div>
+        <div class="form-group">
+          <label class="form-label">TAGLINE</label>
+          <input type="text" id="input-event-tagline" class="input-field" placeholder="e.g. Sunset drinks & volleyball">
+        </div>
+        <div class="form-group">
+          <label class="form-label">DATE & TIME</label>
+          <input type="datetime-local" id="input-event-datetime" class="input-field">
+        </div>
+        <div class="form-group">
+          <label class="form-label">LOCATION (Google Maps Direct Link)</label>
+          <input type="text" id="input-event-location" class="input-field" placeholder="e.g. Santa Monica Pier, Pier Ave, CA">
+        </div>
+        <div class="form-group">
+          <label class="form-label">DESCRIPTION</label>
+          <textarea id="input-event-desc" class="input-field" rows="3" placeholder="Details about what to bring, meeting spot..."></textarea>
+        </div>
+        <button class="btn-primary" id="btn-submit-create-event">Add to Calendar <i data-lucide="calendar-plus"></i></button>
+      </div>
+    </div>
+
+    <!-- BOTTOM SHEET: CREATE POLL -->
+    <div id="modal-create-poll" class="modal-overlay">
+      <div class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:14px;">Create Group Poll (Active 1 Wk)</h3>
+        <div class="form-group">
+          <label class="form-label">POLL QUESTION</label>
+          <input type="text" id="input-poll-question" class="input-field" placeholder="e.g. Where should we do dinner this Friday?">
+        </div>
+        <div class="form-group">
+          <label class="form-label">OPTION 1</label>
+          <input type="text" id="input-poll-opt1" class="input-field" placeholder="e.g. Tacos & Margaritas">
+        </div>
+        <div class="form-group">
+          <label class="form-label">OPTION 2</label>
+          <input type="text" id="input-poll-opt2" class="input-field" placeholder="e.g. Italian Pasta Place">
+        </div>
+        <div class="form-group">
+          <label class="form-label">OPTION 3 (OPTIONAL)</label>
+          <input type="text" id="input-poll-opt3" class="input-field" placeholder="e.g. Sushi Bar">
+        </div>
+        <button class="btn-primary" id="btn-submit-create-poll">Pin Poll in Chat <i data-lucide="check-square"></i></button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JavaScript Scripts -->
+  <script src="js/app.js"></script>
+</body>
+</html>
